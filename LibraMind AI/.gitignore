@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.env
+*.db
+server/logs/
+server/uploads/covers/*
+server/uploads/qrcodes/*
+!server/uploads/covers/.gitkeep
+!server/uploads/qrcodes/.gitkeep
+.DS_Store
+Thumbs.db
+*.log
