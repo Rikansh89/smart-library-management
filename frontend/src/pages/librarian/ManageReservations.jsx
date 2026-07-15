@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { FiCheck } from 'react-icons/fi';
 import { reservationAPI } from '../../services/api';
@@ -15,7 +14,6 @@ const STATUS_OPTIONS = [
 ];
 
 const ManageReservations = () => {
-  const navigate = useNavigate();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');

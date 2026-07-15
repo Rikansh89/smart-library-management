@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiEdit2, FiTrash2, FiPlus, FiX } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import { adminAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -212,7 +212,7 @@ export default function ManageUsers() {
       </div>
 
       {totalPages > 1 && (
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        <Pagination page={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       )}
 
       <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Add User">

@@ -15,27 +15,30 @@ export const AuthProvider = ({ children }) => {
       try {
         const parsed = JSON.parse(savedUser);
         setUser(parsed);
-        connectSocket(parsed.id);
+        if (parsed?.id) connectSocket(parsed.id);
       } catch { }
     }
     setLoading(false);
+    return () => disconnectSocket();
   }, []);
 
   const login = async (email, password) => {
     const { data } = await authAPI.login({ email, password });
+    if (!data?.user || !data?.token) throw new Error('Invalid login response');
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
-    connectSocket(data.user.id);
+    if (data.user.id) connectSocket(data.user.id);
     return data;
   };
 
   const register = async (userData) => {
     const { data } = await authAPI.register(userData);
+    if (!data?.user || !data?.token) throw new Error('Invalid registration response');
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
-    connectSocket(data.user.id);
+    if (data.user.id) connectSocket(data.user.id);
     return data;
   };
 

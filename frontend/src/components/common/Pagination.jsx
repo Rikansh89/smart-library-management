@@ -1,7 +1,7 @@
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
-export default function Pagination({ page, totalPages, onPageChange }) {
-  if (totalPages <= 1) return null;
+export default function Pagination({ page = 1, totalPages = 1, onPageChange }) {
+  if (!totalPages || totalPages <= 1) return null;
 
   const pages = [];
   for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {

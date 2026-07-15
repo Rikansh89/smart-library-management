@@ -131,7 +131,7 @@ function Notifications() {
 
           {totalPages > 1 && (
             <Pagination
-              currentPage={page}
+              page={page}
               totalPages={totalPages}
               onPageChange={setPage}
             />

@@ -134,13 +134,47 @@ npm run build
 
 ## Deployment
 
+> **Note:** This project uses **MySQL** (not MongoDB). For production, provision a MySQL instance on a cloud provider (AWS RDS, Google Cloud SQL, Aiven, or PlanetScale) and set the `DB_*` environment variables accordingly.
+
 ### Vercel (Frontend)
 
-The `vercel.json` at the project root is preconfigured. Set the `VITE_API_URL` environment variable to your backend URL.
+The `vercel.json` at the project root is preconfigured. Set the `VITE_API_URL` environment variable to your Render backend URL.
 
 ### Render (Backend)
 
-The `render.yaml` at the project root is preconfigured. Fill in the required environment variables through the Render dashboard.
+The `render.yaml` at the project root is preconfigured. Fill in the required environment variables through the Render dashboard, including `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, and `JWT_SECRET`.
+
+### Database (MySQL)
+
+The project **does not use MongoDB**. You need a MySQL 8.0+ database:
+
+1. Provision a MySQL instance (e.g., AWS RDS, Aiven, or Render's managed MySQL).
+2. Run `schema.sql` against it: `mysql -h <host> -u <user> -p < schema.sql`
+3. Set `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` in the backend environment.
+
+### Environment Variables Summary
+
+| Variable              | Where         | Required | Description                          |
+| --------------------- | ------------- | -------- | ------------------------------------ |
+| `PORT`                | Backend       | No       | Server port (default: 5001)          |
+| `DB_HOST`             | Backend       | Yes      | MySQL host                           |
+| `DB_USER`             | Backend       | Yes      | MySQL user                           |
+| `DB_PASSWORD`         | Backend       | Yes      | MySQL password                       |
+| `DB_NAME`             | Backend       | Yes      | MySQL database name                  |
+| `JWT_SECRET`          | Backend       | Yes      | JWT signing secret                   |
+| `JWT_EXPIRES_IN`      | Backend       | No       | Token expiry (default: 7d)           |
+| `EMAIL_HOST`          | Backend       | No       | SMTP host for emails                 |
+| `EMAIL_PORT`          | Backend       | No       | SMTP port (default: 587)             |
+| `EMAIL_USER`          | Backend       | No       | SMTP user                            |
+| `EMAIL_PASS`          | Backend       | No       | SMTP password                        |
+| `EMAIL_FROM`          | Backend       | No       | From address for emails              |
+| `GEMINI_API_KEY`      | Backend       | No       | Google Gemini AI key (chatbot)       |
+| `FINE_PER_DAY`        | Backend       | No       | Late fine per day (default: 5)       |
+| `CLIENT_URL`          | Backend       | Yes      | Frontend URL for CORS & reset links  |
+| `VITE_API_URL`        | Frontend      | Yes      | Backend API URL in production        |
+| `VITE_SOCKET_URL`     | Frontend      | No       | Socket.IO server URL                 |
+| `VITE_FINE_RATE_PER_DAY` | Frontend   | No       | Fine rate shown in Settings UI       |
+| `VITE_APP_VERSION`    | Frontend      | No       | Version displayed in Settings        |
 
 ## API Overview
 

@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -35,6 +36,7 @@ function App() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 transition-page">
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={user ? <DashboardRedirect role={user.role} /> : <Landing />} />
           <Route path="/login" element={<Login />} />
@@ -62,6 +64,7 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </ErrorBoundary>
       </main>
       <Footer />
     </div>

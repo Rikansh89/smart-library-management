@@ -16,7 +16,7 @@ export default function Settings() {
   const [savingSettings, setSavingSettings] = useState(false);
 
   useEffect(() => {
-    const envRate = import.meta.env?.VITE_FINE_RATE_PER_DAY || '0.50';
+    const envRate = import.meta.env?.VITE_FINE_RATE_PER_DAY || '5';
     setFineRate(envRate);
     fetchLogs();
   }, []);
@@ -87,7 +87,7 @@ export default function Settings() {
               <button type="submit" disabled={savingFine} className="btn-primary flex items-center gap-2">
                 <FiSave /> {savingFine ? 'Saving...' : 'Update Fine Rate'}
               </button>
-              <p className="text-xs text-gray-400 mt-1">Current rate from environment: ${import.meta.env?.VITE_FINE_RATE_PER_DAY || '0.50'}/day</p>
+              <p className="text-xs text-gray-400 mt-1">Current rate from environment: ${import.meta.env?.VITE_FINE_RATE_PER_DAY || '5'}/day</p>
             </form>
           </div>
 
@@ -140,7 +140,7 @@ export default function Settings() {
             </div>
             <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">API Base URL</span>
-              <span className="font-medium text-sm truncate max-w-[200px]">{import.meta.env?.VITE_API_URL || 'http://localhost:5001/api'}</span>
+              <span className="font-medium text-sm truncate max-w-[200px]">{import.meta.env?.VITE_API_URL || '/api'}</span>
             </div>
             <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">System Uptime</span>
@@ -193,7 +193,7 @@ export default function Settings() {
         )}
         {logsTotalPages > 1 && (
           <div className="mt-4">
-            <Pagination currentPage={logsPage} totalPages={logsTotalPages} onPageChange={setLogsPage} />
+            <Pagination page={logsPage} totalPages={logsTotalPages} onPageChange={setLogsPage} />
           </div>
         )}
       </div>

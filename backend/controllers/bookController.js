@@ -80,7 +80,8 @@ exports.updateBook = async (req, res, next) => {
     if (quantity) {
       const diff = quantity - book.quantity;
       fields.quantity = quantity;
-      fields.available_quantity = book.available_quantity + diff;
+      const newAvailable = book.available_quantity + diff;
+      fields.available_quantity = Math.max(0, newAvailable);
     }
     if (description) fields.description = description;
     if (req.file) fields.cover_image = `/uploads/covers/${req.file.filename}`;

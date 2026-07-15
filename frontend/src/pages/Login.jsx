@@ -22,9 +22,9 @@ export default function Login() {
       const data = await login(form.email, form.password);
       toast.success(`Welcome back, ${data.user.name}!`);
       const dashboards = { student: '/student/dashboard', librarian: '/librarian/dashboard', admin: '/admin/dashboard' };
-      navigate(dashboards[data.user.role]);
-    } catch {
-      // error handled by interceptor
+      navigate(dashboards[data.user.role] || '/');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }

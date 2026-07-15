@@ -92,8 +92,8 @@ export default function Analytics() {
     scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
   };
 
-  const paid = fineStats?.paid ?? 0;
-  const unpaid = fineStats?.unpaid ?? 0;
+  const paid = fineStats?.total_collected ?? 0;
+  const unpaid = fineStats?.total_pending ?? 0;
   const fineData = {
     labels: ['Paid', 'Unpaid'],
     datasets: [
@@ -243,15 +243,15 @@ export default function Analytics() {
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
               <span className="text-green-700 font-medium">Collected Fines</span>
-              <span className="text-xl font-bold text-green-600">${(fineStats?.collected ?? 0).toFixed(2)}</span>
+              <span className="text-xl font-bold text-green-600">${(fineStats?.total_collected ?? 0).toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
               <span className="text-yellow-700 font-medium">Pending Fines</span>
-              <span className="text-xl font-bold text-yellow-600">${(fineStats?.pending ?? 0).toFixed(2)}</span>
+              <span className="text-xl font-bold text-yellow-600">${(fineStats?.total_pending ?? 0).toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
               <span className="text-blue-700 font-medium">Total Fines</span>
-              <span className="text-xl font-bold text-blue-600">${((fineStats?.collected ?? 0) + (fineStats?.pending ?? 0)).toFixed(2)}</span>
+              <span className="text-xl font-bold text-blue-600">${((fineStats?.total_collected ?? 0) + (fineStats?.total_pending ?? 0)).toFixed(2)}</span>
             </div>
           </div>
         </div>

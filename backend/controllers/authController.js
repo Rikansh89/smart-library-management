@@ -30,7 +30,9 @@ exports.register = async (req, res, next) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const userId = await User.create({ name, email, password: hashedPassword, role: role || 'student' });
+    const allowedRoles = ['student', 'librarian'];
+    const userRole = allowedRoles.includes(role) ? role : 'student';
+    const userId = await User.create({ name, email, password: hashedPassword, role: userRole });
     const user = await User.findById(userId);
 
     res.status(201).json({
@@ -174,6 +176,10 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+    }
 
     const [users] = await require('../config/db').query(
       'SELECT * FROM users WHERE reset_expires > NOW()'

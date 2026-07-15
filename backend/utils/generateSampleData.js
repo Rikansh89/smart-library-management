@@ -9,12 +9,18 @@ const generateSampleData = async () => {
     const hashedPassword = await bcrypt.hash('password123', 12);
 
     await pool.query(`INSERT IGNORE INTO users (name, email, password, role) VALUES
-      ('Admin User', 'admin@library.com', '${hashedPassword}', 'admin'),
-      ('Librarian One', 'librarian@library.com', '${hashedPassword}', 'librarian'),
-      ('Student One', 'student@library.com', '${hashedPassword}', 'student'),
-      ('Jane Smith', 'jane@example.com', '${hashedPassword}', 'student'),
-      ('Bob Wilson', 'bob@example.com', '${hashedPassword}', 'student')
-    `);
+      (?, ?, ?, 'admin'),
+      (?, ?, ?, 'librarian'),
+      (?, ?, ?, 'student'),
+      (?, ?, ?, 'student'),
+      (?, ?, ?, 'student')
+    `, [
+      'Admin User', 'admin@library.com', hashedPassword,
+      'Librarian One', 'librarian@library.com', hashedPassword,
+      'Student One', 'student@library.com', hashedPassword,
+      'Jane Smith', 'jane@example.com', hashedPassword,
+      'Bob Wilson', 'bob@example.com', hashedPassword
+    ]);
 
     await pool.query(`INSERT IGNORE INTO books (title, author, isbn, category, publication_year, quantity, available_quantity, description) VALUES
       ('The Great Gatsby', 'F. Scott Fitzgerald', '9780743273565', 'Fiction', 1925, 5, 5, 'A story of the mysteriously wealthy Jay Gatsby.'),

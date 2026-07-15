@@ -77,7 +77,8 @@ function BookCatalog() {
         <div className="flex-1">
           <SearchBar
             placeholder="Search by title, author, or ISBN..."
-            onSearch={handleSearch}
+            value={search}
+            onChange={handleSearch}
           />
         </div>
         <select
@@ -150,7 +151,7 @@ function BookCatalog() {
 
           {totalPages > 1 && (
             <Pagination
-              currentPage={page}
+              page={page}
               totalPages={totalPages}
               onPageChange={handlePageChange}
             />

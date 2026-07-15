@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { notificationAPI } from '../services/api';
 
 const NotificationContext = createContext(null);
@@ -10,8 +10,9 @@ export const NotificationProvider = ({ children }) => {
   const fetchNotifications = useCallback(async (page = 1) => {
     try {
       const { data } = await notificationAPI.getAll({ page, limit: 20 });
-      setNotifications(data.notifications);
-      setUnreadCount(data.notifications.filter(n => !n.is_read).length);
+      const list = data?.notifications || [];
+      setNotifications(list);
+      setUnreadCount(list.filter(n => !n.is_read).length);
     } catch { }
   }, []);
 
@@ -38,10 +39,13 @@ export const NotificationProvider = ({ children }) => {
     } catch { }
   }, []);
 
-  window.__onNotification = (notification) => {
-    setNotifications(prev => [notification, ...prev]);
-    setUnreadCount(prev => prev + 1);
-  };
+  useEffect(() => {
+    window.__onNotification = (notification) => {
+      setNotifications(prev => [notification, ...prev]);
+      setUnreadCount(prev => prev + 1);
+    };
+    return () => { window.__onNotification = null; };
+  }, []);
 
   return (
     <NotificationContext.Provider value={{

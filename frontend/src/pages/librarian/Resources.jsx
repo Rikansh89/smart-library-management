@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { FiUpload, FiTrash2, FiFile, FiPlus } from 'react-icons/fi';
+import { FiUpload, FiTrash2, FiFile } from 'react-icons/fi';
 import { resourceAPI } from '../../services/api';
 import Pagination from '../../components/common/Pagination';
 import Modal from '../../components/common/Modal';
@@ -23,7 +22,6 @@ const initialForm = {
 };
 
 const Resources = () => {
-  const navigate = useNavigate();
   const [resources, setResources] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +50,8 @@ const Resources = () => {
   const fetchCategories = async () => {
     try {
       const res = await resourceAPI.getCategories();
-      setCategories(res.data?.categories || res.data?.data || []);
+      const data = res.data;
+      setCategories(Array.isArray(data) ? data : data?.categories || data?.data || []);
     } catch {
       // ignore
     }

@@ -4,7 +4,8 @@ import toast from 'react-hot-toast';
 let socket = null;
 
 export const connectSocket = (userId) => {
-  socket = io('/', { transports: ['websocket', 'polling'] });
+  const url = import.meta.env.VITE_SOCKET_URL || '/';
+  socket = io(url, { transports: ['websocket', 'polling'] });
 
   socket.on('connect', () => {
     console.log('Socket connected');
@@ -12,7 +13,7 @@ export const connectSocket = (userId) => {
   });
 
   socket.on('notification', (notification) => {
-    toast(notification.title, { icon: '🔔' });
+    toast(notification?.title || 'New notification', { icon: '🔔' });
     if (window.__onNotification) {
       window.__onNotification(notification);
     }

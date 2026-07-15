@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { FiBook, FiClock, FiCheckCircle, FiAlertCircle, FiPlus, FiSettings } from 'react-icons/fi';
 import { issueAPI, bookAPI } from '../../services/api';
@@ -8,7 +8,6 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     pendingRequests: 0,

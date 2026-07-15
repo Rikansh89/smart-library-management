@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Book = require('../models/Book');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 
 exports.chat = async (req, res, next) => {
   try {
@@ -10,9 +10,14 @@ exports.chat = async (req, res, next) => {
       return res.status(400).json({ message: 'Message is required.' });
     }
 
+    if (!genAI) {
+      return res.status(503).json({ message: 'AI chatbot is not configured. Please set GEMINI_API_KEY.' });
+    }
+
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
-    const libraryContext = 'You are a helpful library assistant for Smart Library Management System. You can help users find books, answer questions about library policies, suggest books based on topics, and guide users on how to use the library system. Keep responses concise and helpful. Borrowing period is 14 days, fine is $5 per day overdue.';
+    const finePerDay = parseInt(process.env.FINE_PER_DAY) || 5;
+    const libraryContext = `You are a helpful library assistant for Smart Library Management System. You can help users find books, answer questions about library policies, suggest books based on topics, and guide users on how to use the library system. Keep responses concise and helpful. Borrowing period is 14 days, fine is $${finePerDay} per day overdue.`;
 
     const result = await model.generateContent(libraryContext + '\n\nUser: ' + message + '\nAssistant:');
     const response = result.response.text();
@@ -31,6 +36,11 @@ exports.searchBooks = async (req, res, next) => {
     }
 
     const books = await Book.findAll({ search: query, limit: 5 });
+
+    if (!genAI) {
+      return res.json({ reply: 'AI search is not configured. Here are the matching books:', books: books.books });
+    }
+
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
     const bookList = books.books.map(b => '- ' + b.title + ' by ' + b.author + ' (' + b.category + ')').join('\n');

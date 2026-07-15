@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { FiUsers, FiMapPin, FiCalendar, FiX } from 'react-icons/fi';
+import { FiUsers, FiMapPin, FiCalendar } from 'react-icons/fi';
 import { roomAPI } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const TIME_SLOTS = [
   '09:00-10:00', '10:00-11:00', '11:00-12:00',
-  '12:00-13:00', '13:00-14:00', '14:00-15:00',
-  '15:00-16:00', '16:00-17:00', '17:00-18:00',
+  '12:00-13:00', '14:00-15:00', '15:00-16:00',
+  '16:00-17:00', '17:00-18:00',
 ];
 
 function StudyRoom() {
@@ -71,8 +71,9 @@ function StudyRoom() {
 
   const handleRoomSelect = (room) => {
     setSelectedRoom(room);
-    setSelectedDate(new Date().toISOString().split('T')[0]);
-    fetchAvailability(room.id, selectedDate);
+    const today = new Date().toISOString().split('T')[0];
+    setSelectedDate(today);
+    fetchAvailability(room.id, today);
   };
 
   const handleDateChange = (e) => {

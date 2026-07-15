@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { FiEdit2, FiTrash2, FiPlus, FiX } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { bookAPI } from '../../services/api';
 import SearchBar from '../../components/common/SearchBar';
 import Pagination from '../../components/common/Pagination';
@@ -19,7 +18,6 @@ const initialForm = {
 };
 
 const ManageBooks = () => {
-  const navigate = useNavigate();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -45,7 +43,8 @@ const ManageBooks = () => {
   const fetchCategories = async () => {
     try {
       const res = await bookAPI.getCategories();
-      setCategories(res.data?.categories || res.data?.data || []);
+      const data = res.data;
+      setCategories(Array.isArray(data) ? data : res.data?.categories || res.data?.data || []);
     } catch {
       // ignore
     }

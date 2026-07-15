@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { FiEdit2, FiTrash2, FiPlus, FiX, FiCalendar } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiPlus, FiCalendar } from 'react-icons/fi';
 import { roomAPI } from '../../services/api';
 import Modal from '../../components/common/Modal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -14,7 +13,6 @@ const initialForm = {
 };
 
 const ManageRooms = () => {
-  const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +36,8 @@ const ManageRooms = () => {
     setLoading(true);
     try {
       const res = await roomAPI.getAll();
-      setRooms(res.data?.rooms || res.data?.data || []);
+      const data = res.data;
+      setRooms(Array.isArray(data) ? data : data?.rooms || data?.data || []);
     } catch (error) {
       toast.error('Failed to load rooms');
     } finally {
@@ -288,7 +287,7 @@ const ManageRooms = () => {
 
       <Modal isOpen={!!cancelConfirm} onClose={() => setCancelConfirm(null)} title="Cancel Booking">
         <p className="text-gray-600 mb-6">
-          Are you sure you want to cancel this booking for <strong>{cancelConfirm?.room?.name}</strong>?
+          Are you sure you want to cancel this booking for <strong>{cancelConfirm?.room_name}</strong>?
         </p>
         <div className="flex justify-end gap-3">
           <button onClick={() => setCancelConfirm(null)} className="btn-secondary px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>

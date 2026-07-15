@@ -30,9 +30,9 @@ export default function Register() {
       await register({ name: form.name, email: form.email, password: form.password, role: form.role });
       toast.success('Registration successful!');
       const dashboards = { student: '/student/dashboard', librarian: '/librarian/dashboard', admin: '/admin/dashboard' };
-      navigate(dashboards[form.role]);
-    } catch {
-      // handled by interceptor
+      navigate(dashboards[form.role] || '/');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }

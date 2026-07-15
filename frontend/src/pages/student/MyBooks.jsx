@@ -125,7 +125,7 @@ function MyBooks() {
         <>
           <div className="space-y-4">
             {issues.map((issue) => {
-              const overdue = getOverdueDays(issue.dueDate);
+              const overdue = getOverdueDays(issue.due_date);
               return (
                 <div
                   key={issue.id}
@@ -175,7 +175,7 @@ function MyBooks() {
 
           {totalPages > 1 && (
             <Pagination
-              currentPage={page}
+              page={page}
               totalPages={totalPages}
               onPageChange={setPage}
             />

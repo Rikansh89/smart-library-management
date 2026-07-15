@@ -78,11 +78,15 @@ const IssuedBook = {
     return { issues: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
 
-  async updateStatus(id, status, returned_by = null) {
+  async updateStatus(id, status, userId = null) {
     const fields = { status };
+    if (status === 'issued') {
+      fields.issue_date = new Date();
+      if (userId) fields.issued_by = userId;
+    }
     if (status === 'returned') {
       fields.return_date = new Date();
-      if (returned_by) fields.returned_to = returned_by;
+      if (userId) fields.returned_to = userId;
     }
     if (status === 'approved') {
       fields.approved_date = new Date();

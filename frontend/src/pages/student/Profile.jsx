@@ -36,7 +36,7 @@ function Profile() {
     setSaving(true);
     try {
       const res = await authAPI.updateProfile(form);
-      if (updateUser) updateUser(res.data || res);
+      if (updateUser) updateUser(res.data?.user || res.data || res);
       toast.success('Profile updated successfully');
     } catch (err) {
       toast.error(
@@ -201,8 +201,8 @@ function Profile() {
               <div>
                 <p className="text-sm text-gray-400">Member Since</p>
                 <p className="font-medium text-gray-800">
-                  {user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString()
+                  {user?.created_at
+                    ? new Date(user.created_at).toLocaleDateString()
                     : 'N/A'}
                 </p>
               </div>

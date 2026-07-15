@@ -15,10 +15,18 @@ exports.getDashboard = async (req, res, next) => {
     const [[{ todayReturns }]] = await require('../config/db').query("SELECT COUNT(*) as todayReturns FROM issued_books WHERE status = 'returned' AND DATE(return_date) = CURDATE()");
     const [[{ todayIssues }]] = await require('../config/db').query("SELECT COUNT(*) as todayIssues FROM issued_books WHERE DATE(issue_date) = CURDATE()");
 
+    const [recentActivity] = await require('../config/db').query(
+      `SELECT 'issue' as description, CONCAT(u.name, ' borrowed ', b.title) as message, u.name as user, ib.created_at as timestamp
+       FROM issued_books ib
+       JOIN books b ON ib.book_id = b.id
+       JOIN users u ON ib.user_id = u.id
+       ORDER BY ib.created_at DESC LIMIT 5`
+    );
+
     res.json({
       totalBooks, totalUsers, totalStudents, totalLibrarians,
       activeLoans, pendingRequests, totalFines, collectedFines,
-      todayReturns, todayIssues
+      todayReturns, todayIssues, recentActivity
     });
   } catch (error) {
     next(error);
@@ -38,6 +46,9 @@ exports.getUsers = async (req, res, next) => {
 exports.createUser = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required.' });
+    }
     const existing = await User.findByEmail(email);
     if (existing) {
       return res.status(409).json({ message: 'Email already exists.' });

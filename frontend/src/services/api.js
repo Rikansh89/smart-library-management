@@ -1,8 +1,7 @@
 import axios from 'axios';
-import toast from 'react-hot-toast';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' }
 });
 
@@ -23,7 +22,6 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    toast.error(message);
     return Promise.reject(error);
   }
 );
@@ -108,7 +106,7 @@ export const adminAPI = {
   createUser: (data) => api.post('/admin/users', data),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
-  getLogs: () => api.get('/admin/logs')
+  getLogs: (params) => api.get('/admin/logs', { params })
 };
 
 export const analyticsAPI = {
