@@ -1,5 +1,4 @@
-CREATE DATABASE IF NOT EXISTS smart_library;
-USE smart_library;
+
 
 CREATE TABLE IF NOT EXISTS users (
   id INT PRIMARY KEY AUTO_INCREMENT,
