@@ -10,10 +10,9 @@ const Resource = {
   },
 
   async findAll({ type, category, page = 1, limit = 12 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     let where = [];
     let params = [];
-
     if (type) {
       where.push('type = ?');
       params.push(type);
@@ -22,10 +21,8 @@ const Resource = {
       where.push('category = ?');
       params.push(category);
     }
-
     const whereClause = where.length > 0 ? 'WHERE ' + where.join(' AND ') : '';
     const [[{ total }]] = await pool.query(`SELECT COUNT(*) as total FROM resources ${whereClause}`, params);
-
     const [rows] = await pool.query(
       `SELECT r.*, u.name as uploaded_by_name
        FROM resources r
@@ -33,9 +30,8 @@ const Resource = {
        ${whereClause}
        ORDER BY r.created_at DESC
        LIMIT ? OFFSET ?`,
-      [...params, String(limit), String(offset)]
+      [...params, Number(limit), Number(offset)]
     );
-
     return { resources: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
 
