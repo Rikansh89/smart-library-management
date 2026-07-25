@@ -20,23 +20,19 @@ const User = {
   },
 
   async findAll(role = null, page = 1, limit = 10) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     let query = 'SELECT id, name, email, role, created_at FROM users';
     let countQuery = 'SELECT COUNT(*) as total FROM users';
     const params = [];
-
     if (role) {
       query += ' WHERE role = ?';
       countQuery += ' WHERE role = ?';
       params.push(role);
     }
-
     query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(String(limit), String(offset));
-
+    params.push(Number(limit), Number(offset));
     const [rows] = await pool.query(query, params);
     const [[{ total }]] = await pool.query(countQuery, role ? [role] : []);
-
     return { users: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
 
