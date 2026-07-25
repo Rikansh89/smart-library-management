@@ -10,7 +10,7 @@ const Fine = {
   },
 
   async findByUser(user_id, { page = 1, limit = 10 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     const [[{ total }]] = await pool.query(
       'SELECT COUNT(*) as total FROM fines WHERE user_id = ?', [user_id]
     );
@@ -22,7 +22,7 @@ const Fine = {
        WHERE f.user_id = ?
        ORDER BY f.created_at DESC
        LIMIT ? OFFSET ?`,
-      [user_id, String(limit), String(offset)]
+      [user_id, Number(limit), Number(offset)]
     );
     return { fines: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
@@ -36,7 +36,7 @@ const Fine = {
       'SELECT COALESCE(SUM(amount), 0) as total FROM fines WHERE user_id = ? AND status = "unpaid"',
       [user_id]
     );
-    return total;
+    return Number(total);
   },
 
   async getStats() {
@@ -47,7 +47,11 @@ const Fine = {
       'SELECT COALESCE(SUM(amount), 0) as total_pending FROM fines WHERE status = "unpaid"'
     );
     const [[{ count }]] = await pool.query('SELECT COUNT(*) as count FROM fines WHERE status = "unpaid"');
-    return { total_collected, total_pending, unpaid_count: count };
+    return {
+      total_collected: Number(total_collected),
+      total_pending: Number(total_pending),
+      unpaid_count: count
+    };
   }
 };
 
