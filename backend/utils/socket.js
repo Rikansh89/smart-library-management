@@ -2,9 +2,13 @@ const Notification = require('../models/Notification');
 
 let io;
 
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',')
+  : ['http://localhost:5173'];
+
 const initSocket = (server) => {
   io = require('socket.io')(server, {
-    cors: { origin: process.env.CLIENT_URL, methods: ['GET', 'POST'] }
+    cors: { origin: allowedOrigins, methods: ['GET', 'POST'], credentials: true }
   });
 
   io.on('connection', (socket) => {
