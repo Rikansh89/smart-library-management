@@ -22,19 +22,16 @@ const IssuedBook = {
   },
 
   async findByUser(user_id, { status, page = 1, limit = 10 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     let where = 'WHERE ib.user_id = ?';
     let params = [user_id];
-
     if (status) {
       where += ' AND ib.status = ?';
       params.push(status);
     }
-
     const [[{ total }]] = await pool.query(
       `SELECT COUNT(*) as total FROM issued_books ib ${where}`, params
     );
-
     const [rows] = await pool.query(
       `SELECT ib.*, b.title as book_title, b.author, b.isbn, b.cover_image,
               DATEDIFF(CURDATE(), ib.due_date) as overdue_days
@@ -43,26 +40,22 @@ const IssuedBook = {
        ${where}
        ORDER BY ib.issue_date DESC
        LIMIT ? OFFSET ?`,
-      [...params, String(limit), String(offset)]
+      [...params, Number(limit), Number(offset)]
     );
-
     return { issues: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
 
   async getAll({ status, page = 1, limit = 10 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     let where = '';
     let params = [];
-
     if (status) {
       where = 'WHERE ib.status = ?';
       params.push(status);
     }
-
     const [[{ total }]] = await pool.query(
       `SELECT COUNT(*) as total FROM issued_books ib ${where}`, params
     );
-
     const [rows] = await pool.query(
       `SELECT ib.*, b.title as book_title, b.author, b.isbn, b.cover_image,
               u.name as user_name, u.email as user_email
@@ -72,9 +65,8 @@ const IssuedBook = {
        ${where}
        ORDER BY ib.issue_date DESC
        LIMIT ? OFFSET ?`,
-      [...params, String(limit), String(offset)]
+      [...params, Number(limit), Number(offset)]
     );
-
     return { issues: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
 
