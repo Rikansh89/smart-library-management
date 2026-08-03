@@ -11,12 +11,9 @@ const Recommendation = {
        ORDER BY cnt DESC
        LIMIT 3`, [user_id]
     );
-
     if (categories.length === 0) return [];
-
     const categoryList = categories.map(c => c.category);
     const placeholders = categoryList.map(() => '?').join(',');
-
     const [books] = await pool.query(
       `SELECT DISTINCT b.* FROM books b
        WHERE b.category IN (${placeholders})
@@ -24,14 +21,14 @@ const Recommendation = {
        AND b.available_quantity > 0
        ORDER BY b.borrow_count DESC
        LIMIT ?`,
-      [...categoryList, user_id, String(limit)]
+      [...categoryList, user_id, Number(limit)]
     );
     return books;
   },
 
   async getPopular(limit = 5) {
     const [books] = await pool.query(
-      `SELECT * FROM books ORDER BY borrow_count DESC LIMIT ?`, [String(limit)]
+      `SELECT * FROM books ORDER BY borrow_count DESC LIMIT ?`, [Number(limit)]
     );
     return books;
   },
@@ -46,12 +43,9 @@ const Recommendation = {
        ORDER BY cnt DESC
        LIMIT 3`, [user_id]
     );
-
     if (authors.length === 0) return [];
-
     const authorList = authors.map(a => a.author);
     const placeholders = authorList.map(() => '?').join(',');
-
     const [books] = await pool.query(
       `SELECT DISTINCT b.* FROM books b
        WHERE b.author IN (${placeholders})
@@ -59,7 +53,7 @@ const Recommendation = {
        AND b.available_quantity > 0
        ORDER BY b.borrow_count DESC
        LIMIT ?`,
-      [...authorList, user_id, String(limit)]
+      [...authorList, user_id, Number(limit)]
     );
     return books;
   },

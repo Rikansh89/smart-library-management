@@ -50,7 +50,7 @@ function Dashboard() {
       setStats({
         activeLoans: issuesData.total || 0,
         reservations: reservationsData.total || 0,
-        pendingFines: finesData.total || 0,
+        pendingFines: Number(finesData.total) || 0,
         unreadNotifications:
           notificationsData.unreadCount || notificationsData.count || 0,
       });

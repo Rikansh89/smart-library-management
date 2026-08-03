@@ -6,23 +6,19 @@ let socket = null;
 export const connectSocket = (userId) => {
   const url = import.meta.env.VITE_SOCKET_URL || '/';
   socket = io(url, { transports: ['websocket', 'polling'] });
-
   socket.on('connect', () => {
     console.log('Socket connected');
     socket.emit('join', userId);
   });
-
   socket.on('notification', (notification) => {
     toast(notification?.title || 'New notification', { icon: '🔔' });
     if (window.__onNotification) {
       window.__onNotification(notification);
     }
   });
-
   socket.on('disconnect', () => {
     console.log('Socket disconnected');
   });
-
   return socket;
 };
 

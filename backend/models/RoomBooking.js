@@ -10,7 +10,7 @@ const RoomBooking = {
   },
 
   async findByUser(user_id, { page = 1, limit = 10 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     const [[{ total }]] = await pool.query(
       'SELECT COUNT(*) as total FROM room_bookings WHERE user_id = ?', [user_id]
     );
@@ -21,13 +21,13 @@ const RoomBooking = {
        WHERE rb.user_id = ?
        ORDER BY rb.created_at DESC
        LIMIT ? OFFSET ?`,
-      [user_id, String(limit), String(offset)]
+      [user_id, Number(limit), Number(offset)]
     );
     return { bookings: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
 
   async getAll({ page = 1, limit = 10 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     const [[{ total }]] = await pool.query('SELECT COUNT(*) as total FROM room_bookings');
     const [rows] = await pool.query(
       `SELECT rb.*, sr.name as room_name, u.name as user_name, u.email as user_email
@@ -36,7 +36,7 @@ const RoomBooking = {
        JOIN users u ON rb.user_id = u.id
        ORDER BY rb.created_at DESC
        LIMIT ? OFFSET ?`,
-      [String(limit), String(offset)]
+      [Number(limit), Number(offset)]
     );
     return { bookings: rows, total, page, totalPages: Math.ceil(total / limit) };
   },

@@ -11,10 +11,9 @@ const Book = {
   },
 
   async findAll({ page = 1, limit = 12, search, category, sort } = {}) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     let where = [];
     let params = [];
-
     if (search) {
       where.push('(b.title LIKE ? OR b.author LIKE ? OR b.isbn LIKE ?)');
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
@@ -23,20 +22,16 @@ const Book = {
       where.push('b.category = ?');
       params.push(category);
     }
-
     const whereClause = where.length > 0 ? 'WHERE ' + where.join(' AND ') : '';
     let orderBy = 'ORDER BY b.created_at DESC';
     if (sort === 'title') orderBy = 'ORDER BY b.title ASC';
     if (sort === 'popular') orderBy = 'ORDER BY b.borrow_count DESC';
-
     const countQuery = `SELECT COUNT(*) as total FROM books b ${whereClause}`;
     const [[{ total }]] = await pool.query(countQuery, params);
-
     const query = `SELECT b.*, 
       (SELECT COUNT(*) FROM issued_books ib WHERE ib.book_id = b.id AND ib.status = 'issued') as active_loans
       FROM books b ${whereClause} ${orderBy} LIMIT ? OFFSET ?`;
-    params.push(String(limit), String(offset));
-
+    params.push(Number(limit), Number(offset));
     const [rows] = await pool.query(query, params);
     return { books: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
@@ -79,7 +74,7 @@ const Book = {
        JOIN issued_books ib ON b.id = ib.book_id
        GROUP BY b.id
        ORDER BY borrow_count DESC
-       LIMIT ?`, [String(limit)]
+       LIMIT ?`, [Number(limit)]
     );
     return rows;
   },

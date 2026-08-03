@@ -3,10 +3,21 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+console.log('Starting Smart Library Backend...');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+
 const errorHandler = require('./middleware/errorHandler');
 const { initializeDatabase } = require('./config/db');
 
 const app = express();
+
+app.get('/', (req, res) => {
+  res.json({
+    status: 'running',
+    message: 'Smart Library Backend is alive'
+  });
+});
 
 const allowedOrigins = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(u => u.trim()) : ['http://localhost:5173'];
 console.log(`[CORS] Allowed origins: ${allowedOrigins.join(', ')}`);
@@ -80,8 +91,9 @@ const startServer = async () => {
   validateEnv();
   await initializeDatabase();
 
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
+    console.log('Listening on 0.0.0.0');
   });
 
   const { initSocket } = require('./utils/socket');

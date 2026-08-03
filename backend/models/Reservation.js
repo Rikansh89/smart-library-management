@@ -10,7 +10,7 @@ const Reservation = {
   },
 
   async findByUser(user_id, { page = 1, limit = 10 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     const [[{ total }]] = await pool.query(
       'SELECT COUNT(*) as total FROM reservations WHERE user_id = ?', [user_id]
     );
@@ -21,13 +21,13 @@ const Reservation = {
        WHERE r.user_id = ?
        ORDER BY r.created_at DESC
        LIMIT ? OFFSET ?`,
-      [user_id, String(limit), String(offset)]
+      [user_id, Number(limit), Number(offset)]
     );
     return { reservations: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
 
   async getAll({ page = 1, limit = 10 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     const [[{ total }]] = await pool.query('SELECT COUNT(*) as total FROM reservations');
     const [rows] = await pool.query(
       `SELECT r.*, b.title as book_title, b.author, b.isbn, b.cover_image,
@@ -37,7 +37,7 @@ const Reservation = {
        JOIN users u ON r.user_id = u.id
        ORDER BY r.created_at DESC
        LIMIT ? OFFSET ?`,
-      [String(limit), String(offset)]
+      [Number(limit), Number(offset)]
     );
     return { reservations: rows, total, page, totalPages: Math.ceil(total / limit) };
   },

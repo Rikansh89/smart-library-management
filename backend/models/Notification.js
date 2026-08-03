@@ -10,13 +10,13 @@ const Notification = {
   },
 
   async findByUser(user_id, { page = 1, limit = 20 }) {
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
     const [[{ total }]] = await pool.query(
       'SELECT COUNT(*) as total FROM notifications WHERE user_id = ?', [user_id]
     );
     const [rows] = await pool.query(
       'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
-      [user_id, String(limit), String(offset)]
+      [user_id, Number(limit), Number(offset)]
     );
     return { notifications: rows, total, page, totalPages: Math.ceil(total / limit) };
   },
