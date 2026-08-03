@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
   });
 });
 
-const allowedOrigins = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(u => u.trim()) : ['http://localhost:5173'];
+const allowedOrigins = [...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(u => u.trim()) : ['http://localhost:5173']), 'https://rikansh89.github.io'];
 console.log(`[CORS] Allowed origins: ${allowedOrigins.join(', ')}`);
 app.use(cors({
   origin: (origin, callback) => {
