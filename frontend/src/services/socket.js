@@ -4,7 +4,9 @@ import toast from 'react-hot-toast';
 let socket = null;
 
 export const connectSocket = (userId) => {
-  const url = import.meta.env.VITE_SOCKET_URL || '/';
+  const url =
+    import.meta.env.VITE_SOCKET_URL ||
+    (import.meta.env.PROD ? 'https://smart-library-management-pxo5.onrender.com' : '/');
   socket = io(url, { transports: ['websocket', 'polling'] });
   socket.on('connect', () => {
     console.log('Socket connected');

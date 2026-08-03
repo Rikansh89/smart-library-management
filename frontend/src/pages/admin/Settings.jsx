@@ -140,7 +140,7 @@ export default function Settings() {
             </div>
             <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">API Base URL</span>
-              <span className="font-medium text-sm truncate max-w-[200px]">{import.meta.env?.VITE_API_URL || '/api'}</span>
+              <span className="font-medium text-sm truncate max-w-[200px]">{import.meta.env?.VITE_API_URL || (import.meta.env.PROD ? 'https://smart-library-management-pxo5.onrender.com/api' : '/api')}</span>
             </div>
             <div className="flex justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-600">System Uptime</span>
