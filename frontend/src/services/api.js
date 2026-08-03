@@ -16,6 +16,13 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response) {
+      console.error(`[API] ${error.config?.method?.toUpperCase()} ${error.config?.url} -> ${error.response.status}:`, error.response.data);
+    } else if (error.request) {
+      console.error(`[API] No response received for ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, error.message);
+    } else {
+      console.error('[API] Request setup error:', error.message);
+    }
     const message = error.response?.data?.message || 'Something went wrong';
     if (error.response?.status === 401) {
       localStorage.removeItem('token');

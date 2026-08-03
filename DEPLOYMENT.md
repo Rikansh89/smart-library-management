@@ -4,8 +4,8 @@
 
 ```
 Frontend (React + Vite)  →  Vercel
-Backend (Node.js + Express)  →  Render
-Database (MySQL)  →  ClearDB / PlanetScale / Railway
+Backend (Node.js + Express)  →  Render (free tier)
+Database (MySQL)  →  Aiven (free tier)
 ```
 
 ---
@@ -13,7 +13,7 @@ Database (MySQL)  →  ClearDB / PlanetScale / Railway
 ## Prerequisites
 
 - Node.js 18+ installed
-- MySQL database (ClearDB, PlanetScale, Railway, or self-hosted)
+- MySQL database (Aiven, ClearDB, PlanetScale, or self-hosted)
 - GitHub account
 - Vercel account (free tier works)
 - Render account (free tier works)
@@ -36,26 +36,38 @@ git push -u origin main
 
 ## Step 2: Set Up MySQL Database
 
-### Option A: ClearDB (Free, on Heroku)
+### Option A: Aiven (Free, Recommended)
+
+1. Go to https://aiven.io and sign up (**no credit card required**)
+2. Create a new project (e.g. `smart-library`)
+3. Click **Create service** → choose **Aiven for MySQL** → select the **free plan** (hobbyist)
+4. Wait ~2-3 minutes for provisioning, then open the service **Overview** page
+5. Copy the **Service URI** from the **Connection information** section. It looks like:
+   ```
+   mysql://avnadmin:PASSWORD@smart-library-xxxx.aivencloud.com:PORT/defaultdb?ssl-mode=REQUIRED
+   ```
+6. Set it as `MYSQL_URL` in your backend environment variables (or split it into `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME=defaultdb`)
+7. **SSL is always on** for Aiven. If you use `MYSQL_URL`, the backend enables SSL automatically. If you split into individual variables, set `DB_SSL=true`
+
+> **Free tier caveats:** one MySQL service per project, may auto-power-off after idle (just power it back on from the console), no 24/7 SLA. Fine for development/demo.
+
+### Option B: ClearDB (Free, on Heroku)
 1. Go to https://elements.heroku.com/addons/cleardb
 2. Create a database
 3. Copy the `DATABASE_URL` from ClearDB dashboard
 4. Extract host, user, password, database name from the URL
 
-### Option B: PlanetScale (Free tier)
+### Option C: PlanetScale (Free tier)
 1. Go to https://planetscale.com
 2. Create a new database
 3. Copy connection details from the dashboard
 4. Import the schema: `backend/schema.sql`
 
-### Option C: Railway
-1. Go to https://railway.app
-2. Add MySQL service
-3. Copy connection details
+### Schema Auto-Initialization
 
-### Import Schema
+**The backend now automatically creates all tables on startup** if the database is empty. You do **NOT** need to manually import `schema.sql` — the server reads and executes it when no tables exist.
 
-After creating the database, import the schema:
+If you prefer manual import (e.g., for existing databases):
 
 ```bash
 # Using MySQL CLI
@@ -75,11 +87,42 @@ node utils/generateSampleData.js
 
 ---
 
-## Step 3: Deploy Backend to Render
+## Step 2.5: Migrate Existing Data to Aiven
 
-### 3.1 Create a Render account at https://render.com
+If you already have data in your existing MySQL database and want to keep it, copy it over **before** switching the backend. No MySQL CLI is required — a Node script is included.
 
-### 3.2 Create a new Web Service
+1. Get the **current database connection URL** (e.g., from your old host's dashboard — `MYSQL_URL` variable, ClearDB's `DATABASE_URL`, etc.)
+2. Get your **Aiven Service URI** (Aiven Console → service → Overview → Connection information)
+3. Run the migration from the `backend` folder:
+
+```powershell
+# Windows (PowerShell)
+$env:SOURCE_MYSQL_URL = "mysql://USER:PASS@old-host:PORT/db_name"
+$env:DEST_MYSQL_URL   = "mysql://avnadmin:PASS@smart-library-xxxx.aivencloud.com:PORT/defaultdb"
+npm run migrate:db
+```
+
+```bash
+# macOS / Linux
+SOURCE_MYSQL_URL="mysql://USER:PASS@old-host:PORT/db_name" \
+DEST_MYSQL_URL="mysql://avnadmin:PASS@smart-library-xxxx.aivencloud.com:PORT/defaultdb" \
+npm run migrate:db
+```
+
+4. The script **drops and recreates** each table on the destination, then copies every row (it handles foreign keys by disabling FK checks). Watch for `Done. N total row(s) migrated`.
+5. **Uploaded files** (book covers, digital resources) are stored in `backend/uploads/`, not in the database — copy that folder to your new host separately if you want to keep them.
+
+> **Tip:** power on your Aiven service first (free services sleep when idle). If the script fails on a table, check that the destination database name in the URI matches (`defaultdb` for Aiven).
+
+---
+
+## Step 3: Deploy Backend
+
+### Option A: Render (Recommended)
+
+#### 3.1 Create a Render account at https://render.com
+
+#### 3.2 Create a new Web Service
 1. Click **New** → **Web Service**
 2. Connect your GitHub repository
 3. Configure:
@@ -92,7 +135,7 @@ node utils/generateSampleData.js
    - **Start Command:** `node server.js`
    - **Plan:** Free
 
-### 3.3 Set Environment Variables
+#### 3.3 Set Environment Variables
 
 Go to **Environment** tab and add these variables:
 
@@ -100,10 +143,7 @@ Go to **Environment** tab and add these variables:
 |-----|-------|-------|
 | `NODE_ENV` | `production` | |
 | `PORT` | `5001` | Render sets this automatically, but set it for clarity |
-| `DB_HOST` | `your-db-host` | From your MySQL provider |
-| `DB_USER` | `your-db-user` | From your MySQL provider |
-| `DB_PASSWORD` | `your-db-password` | From your MySQL provider |
-| `DB_NAME` | `your-db-name` | From your MySQL provider |
+| `MYSQL_URL` | (your Aiven Service URI) | `mysql://user:pass@host:port/defaultdb?ssl-mode=REQUIRED` — SSL is enabled automatically when this is set |
 | `JWT_SECRET` | (generate random string) | Use a long random string |
 | `JWT_EXPIRES_IN` | `7d` | Token expiry duration |
 | `CLIENT_URL` | `https://your-app.vercel.app` | Your Vercel frontend URL (set after Step 4) |
@@ -115,16 +155,27 @@ Go to **Environment** tab and add these variables:
 | `EMAIL_PASS` | (app password) | Optional |
 | `EMAIL_FROM` | (your email) | Optional |
 
-### 3.4 Deploy
+**Not using a connection URI?** Use these instead of `MYSQL_URL`:
+
+| Key | Value | Notes |
+|-----|-------|-------|
+| `DB_HOST` | `smart-library-xxxx.aivencloud.com` | From Aiven Console |
+| `DB_PORT` | (Aiven port, e.g. `12691`) | From Aiven Console |
+| `DB_USER` | `avnadmin` | From Aiven Console |
+| `DB_PASSWORD` | (Aiven password) | From Aiven Console |
+| `DB_NAME` | `defaultdb` | Aiven's default database name |
+| `DB_SSL` | `true` | **Required** for Aiven |
+
+#### 3.4 Deploy
 1. Click **Create Web Service**
 2. Wait for deployment to complete (2-3 minutes)
 3. Note your backend URL: `https://smart-library-backend.onrender.com`
 
-### 3.5 Verify Backend
+#### 3.5 Verify Backend
 Visit: `https://smart-library-backend.onrender.com/api/health`
 You should see: `{"status":"ok","timestamp":"..."}`
 
-### 3.6 Update CLIENT_URL
+#### 3.6 Update CLIENT_URL
 Go back to Render → Environment tab → Update `CLIENT_URL` with your actual Vercel URL.
 
 ---
@@ -191,10 +242,13 @@ curl -X POST https://smart-library-backend.onrender.com/api/auth/register \
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `DB_HOST` | MySQL host | `us-cdbr-east-02.cleardb.com` |
-| `DB_USER` | MySQL username | `bc8372a4b5c6de` |
+| `MYSQL_URL` | Full MySQL connection URI (Aiven, ClearDB, PlanetScale, etc.). Overrides individual `DB_*` vars and enables SSL | `mysql://avnadmin:pass@host:12691/defaultdb?ssl-mode=REQUIRED` |
+| `DB_HOST` | MySQL host | `smart-library-xxxx.aivencloud.com` |
+| `DB_USER` | MySQL username | `avnadmin` |
 | `DB_PASSWORD` | MySQL password | `abc123xyz` |
-| `DB_NAME` | MySQL database name | `heroku_abc123` |
+| `DB_NAME` | MySQL database name | `defaultdb` (Aiven) |
+| `DB_PORT` | MySQL port (required for Aiven) | `12691` |
+| `DB_SSL` | Enable SSL for MySQL | `true` (for hosted MySQL) |
 | `JWT_SECRET` | Secret for JWT tokens | `your-256-bit-secret` |
 | `JWT_EXPIRES_IN` | Token expiry | `7d` |
 | `CLIENT_URL` | Frontend URL | `https://app.vercel.app` |
@@ -275,8 +329,9 @@ Backend: http://localhost:5001
 ### Backend Won't Start
 1. Check all environment variables are set
 2. Verify MySQL connection (host, user, password, database)
-3. Check Render logs: Dashboard → Logs tab
-4. Ensure `schema.sql` was imported into the database
+3. Set `DB_SSL=true` if using hosted MySQL
+4. Check Render logs: Dashboard → Logs tab
+5. Tables are auto-created on startup if the database is empty
 
 ### Frontend Can't Connect to Backend
 1. Verify `VITE_API_URL` is set correctly (must end with `/api`)
@@ -285,8 +340,8 @@ Backend: http://localhost:5001
 4. Check CORS: Backend must allow your Vercel domain
 
 ### Database Connection Errors
-1. Ensure MySQL allows remote connections
-2. Check if your MySQL provider requires SSL (`ssl: {}` in db.js)
+1. Set `DB_SSL=true` in environment variables
+2. Ensure MySQL allows remote connections
 3. Verify firewall rules allow connection on port 3306
 4. For ClearDB/PlanetScale, use the full connection URL
 
@@ -303,6 +358,13 @@ Backend: http://localhost:5001
 1. Ensure `CLIENT_URL` matches your exact Vercel domain
 2. Check Render logs for socket connection errors
 3. Verify `VITE_SOCKET_URL` is set in Vercel
+
+### Registration/Login Fails with "Something went wrong"
+1. Check backend logs for database errors
+2. Verify `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` are correct
+3. Tables are auto-created on startup; if missing, check if the first startup succeeded
+4. Visit `/api/health` — if it returns `database: "disconnected"`, check DB credentials
+5. Set `DB_SSL=true` for hosted MySQL providers
 
 ### Email Notifications Not Sending
 1. Check `EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASS` are set
@@ -386,4 +448,4 @@ Backend: http://localhost:5001
 | Database | MySQL with mysql2 driver |
 | Auth | JWT (JSON Web Tokens), bcryptjs |
 | AI | Google Gemini API (optional) |
-| Hosting | Vercel (frontend), Render (backend) |
+| Hosting | Vercel (frontend), Render (backend), Aiven (MySQL database) |

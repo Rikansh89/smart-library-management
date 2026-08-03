@@ -18,12 +18,15 @@ export default function Login() {
       return;
     }
     setLoading(true);
+    console.log(`[LOGIN] Submitting login for: ${form.email}`);
     try {
       const data = await login(form.email, form.password);
+      console.log('[LOGIN] Success:', data.user);
       toast.success(`Welcome back, ${data.user.name}!`);
       const dashboards = { student: '/student/dashboard', librarian: '/librarian/dashboard', admin: '/admin/dashboard' };
       navigate(dashboards[data.user.role] || '/');
     } catch (err) {
+      console.error('[LOGIN] Failed:', err.response?.status, err.response?.data || err.message);
       toast.error(err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);

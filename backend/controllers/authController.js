@@ -46,32 +46,50 @@ exports.register = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
+  const startTime = Date.now();
   try {
     const { email, password } = req.body;
 
+    console.log(`[LOGIN] Attempt for email: ${email || '<missing>'}`);
+
     if (!email || !password) {
+      console.log(`[LOGIN] Validation failed - email: ${!!email}, password: ${!!password}`);
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
+    console.log(`[LOGIN] Looking up user by email...`);
     const user = await User.findByEmail(email);
+    console.log(`[LOGIN] DB lookup completed in ${Date.now() - startTime}ms, found: ${!!user}`);
+
     if (!user) {
+      console.log(`[LOGIN] No user found for email: ${email}`);
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
+    console.log(`[LOGIN] Comparing password for user id=${user.id}, role=${user.role}...`);
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log(`[LOGIN] Password match: ${isMatch}`);
+
     if (!isMatch) {
+      console.log(`[LOGIN] Password mismatch for user id=${user.id}`);
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
+    console.log(`[LOGIN] Generating JWT token...`);
     const token = generateToken(user);
+    console.log(`[LOGIN] JWT generated successfully`);
+
     const { password: _, ...userData } = user;
 
+    console.log(`[LOGIN] Login successful for ${email} (id=${user.id}, role=${user.role}) in ${Date.now() - startTime}ms`);
     res.json({
       message: 'Login successful.',
       token,
       user: userData
     });
   } catch (error) {
+    console.error(`[LOGIN] Error during login for ${req.body?.email}:`, error.message);
+    console.error(`[LOGIN] Error stack:`, error.stack);
     next(error);
   }
 };
